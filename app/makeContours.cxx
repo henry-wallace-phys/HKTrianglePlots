@@ -33,6 +33,7 @@ int main(int argc, char **argv){
     triCanv->Print(gOutFileName+".pdf[");
     //Loop over our hists
     for(int iPar1=0; iPar1<(int)oscPars.size(); iPar1++){
+		std::cout<<"Making contours for "<<oscPars[iPar1]<<std::endl;
         std::vector<contours2D> tmpVec;
         THStack* tmpStack;
         for(int iPar2=0; iPar2<=iPar1; iPar2++){

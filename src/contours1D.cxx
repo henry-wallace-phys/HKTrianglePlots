@@ -25,48 +25,57 @@ contourBase(paramName+"_1DHist", massHierarchyOpt, octantOpt, burnin)
 		
 	
     oscParamName=paramName;
-    inFile->Close();
 
     setup1DCredibleIntervals();
     makePrettyHist<std::vector<TH1D* > >(credibleIntervalHists);
+    inFile->Close();
+}
+
+contours1D::~contours1D(){
+	delete posteriorHist;
+	credibleIntervalHists.clear();
+	credibleIntervalHists.shrink_to_fit();
 }
 
 
 void contours1D::setup1DCredibleIntervals(){
     std::vector<double> credibleIntervals_vec = {0.67, 0.95, 99.9, 99.99, 99.99999};
     // {1sigma, 2sigma, 3sigma, 4sigma, 5sigma}
-    double integral = posteriorHist->Integral();
+
+	double integral = posteriorHist->Integral(); 
+	credibleBoundaries.reserve(credibleIntervals_vec.size());
+	credibleIntervalHists.reserve(credibleIntervals_vec.size());
 	
-    for(int iCredibleInt=0; iCredibleInt<(int)credibleIntervals_vec.size(); iCredibleInt++){
+	for(int iCredibleInt=0; iCredibleInt<(int)credibleIntervals_vec.size(); iCredibleInt++){
         TString histName;
         double credVal = credibleIntervals_vec[iCredibleInt];
         histName.Form("%0.7f Credible Interval", credVal);
         TH1D* copyHist = (TH1D*)posteriorHist->Clone(histName);
 
-        double tsum=0;
-        double up = -9999999.;
-        double low = 9999999.;
-        int nbins = 0;
-        double xwidth;
-        double bf = copyHist->GetXaxis()->GetBinCenter(copyHist->GetMaximumBin());
+        double tsum=0; //total sum
+        double up = -9999999.; //upper bound
+        double low = 9999999.; //lower bound
+        int nbins = 0; //number of bins
+        double xwidth; //width of bins
+        double bf = copyHist->GetXaxis()->GetBinCenter(copyHist->GetMaximumBin()); //OG big bin
 
-        while((tsum/integral)<credVal) {
-            double tmax = copyHist->GetMaximum();
+        while((tsum/integral)<credVal && copyHist->GetMaximum()!=-1.0) {
+			//Loop until we delete (set to -1) any bins inside of credible interval
+            double tmax = copyHist->GetMaximum(); 
             int bin = copyHist->GetMaximumBin();
             int xval = copyHist->GetXaxis()->GetBinCenter(bin);
 
+			
             xwidth = copyHist->GetXaxis()->GetBinWidth(bin);
-            if((tsum/integral)<credVal) {
-                copyHist->SetBinContent(bin,-1.0);
-                copyHist->SetBinContent(bin,0.);
-                if(xval<low && xval<bf) low = xval - xwidth/2.;
-                if(xval>up && xval>bf) up = xval + xwidth/2.;
-                nbins++;
-            }
+			copyHist->SetBinContent(bin,-1.0);
+			copyHist->SetBinContent(bin,0.);
+			if(xval<low && xval<bf) low = xval - xwidth/2.;
+			if(xval>up && xval>bf) up = xval + xwidth/2.;
+			nbins++;
             tsum+=tmax;
         }
-        credibleIntervalHists.push_back(copyHist);
+        credibleIntervalHists[iCredibleInt]=copyHist;
         std::vector<double> tmpbounds = {low,up}; //Keep track of this
-        credibleBoundaries.push_back(tmpbounds);
+        credibleBoundaries[iCredibleInt]=tmpbounds;
     }
 }

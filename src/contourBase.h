@@ -20,7 +20,8 @@
 class contourBase{
     public:
         contourBase(TString histName, int massHierarchyOpt, int octantOpt, int burn_in);
-        THStack* getCredibleStack(){return fullPosteriorStack;}
+		~contourBase();
+		THStack* getCredibleStack(){return fullPosteriorStack;}
 
         TString setHistOptions();
         void plotContourHist(TString outFile); //NO EXTENSION HERE!

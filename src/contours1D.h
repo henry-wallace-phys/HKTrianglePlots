@@ -7,6 +7,7 @@ class contours1D : public contourBase{
     public:
         contours1D(TString reducedFileName, TString paramName, TString oscBranchName, double lowerBound, double upperBound, int nBins, int massHierarchyOpt, int octantOpt, int burnin);
 
+		~contours1D();
         TH1D* getPosteriorHist(){return posteriorHist;}
 
 

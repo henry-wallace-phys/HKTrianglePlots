@@ -17,14 +17,22 @@ contours2D::contours2D(TString reducedFileName, TString param1Name, TString para
     oscTree->Draw(param1Name+":"+param2Name+">>posteriorHist+", histOptions);
     get2DCredibleIntervals();
     makePrettyHist<std::vector<TH2D* > >(contourHists);
+	inFile->Close();
 }
+	
 
+contours2D::~contours2D(){
+	delete posteriorHist;
+	contourHists.clear();
+	contourHists.shrink_to_fit();
+}
 
 void contours2D::get2DCredibleIntervals(){
     //Givs us a vector of contour levels for plotting later!
     std::vector<double> credibleIntervals = {0.67, 0.95, 99.9, 99.999, 99.999999};
     double integral=posteriorHist->Integral();
 
+	// Make contours for each credible interval
     for(int iCredibleInt=0; iCredibleInt <(int)credibleIntervals.size(); iCredibleInt++){
         TString histName;
         histName.Form("%0.7f Credible Interval", credibleIntervals[iCredibleInt]);

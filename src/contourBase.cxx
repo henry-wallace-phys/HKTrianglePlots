@@ -7,6 +7,9 @@ contourBase::contourBase(TString histName, int massHierarchyOpt, int octantOpt, 
     burnin=burn_in;
 }
 
+contourBase::~contourBase(){
+	delete fullPosteriorStack;
+}
 
 TString contourBase::setHistOptions(){
     TString optStr;
