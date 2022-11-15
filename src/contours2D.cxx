@@ -8,13 +8,14 @@ contours2D::contours2D(TString reducedFileName, TString param1Name, TString para
         std::cerr<<"ERROR : Couldn't find : "<<reducedFileName<<std::endl;
         throw;
     }
- 
     TTree* oscTree = (TTree*)inFile->Get("osc_posteriors");
+	oscTree->SetBranchStatus("*", 1);
 
     TString histOptions = setHistOptions();
 
     posteriorHist = new TH2D( "posteriorHist", "posteriorHist", nBins1, lowerBound1, upperBound1, nBins2, lowerBound2, upperBound2);
-    oscTree->Draw(param1Name+":"+param2Name+">>posteriorHist+", histOptions);
+    oscTree->Draw(param1Name+":"+param2Name+">>posteriorHist", histOptions);
+
     get2DCredibleIntervals();
     makePrettyHist<TH2D*>(contourHists, posteriorHist);
 }
@@ -56,4 +57,23 @@ void contours2D::get2DCredibleIntervals(){
         contourHists.push_back(copyHist);
         contourLevels.push_back(tmax); //Get maximum bin for the interval
     }
+}
+
+void contours2D::plot2DPosterior(TString outFile){
+  
+    gStyle->SetPalette(kCool);
+    TFile* outFileROOT=new TFile(outFile+".root", "UPDATE");
+    outFileROOT->cd();
+    TCanvas* canv = new TCanvas(_histTitle, _histTitle, 1200, 600);
+    canv->Draw();
+    canv->cd();
+	posteriorHist->Draw("COLZ");
+    gPad->BuildLegend();
+
+    outFile+="_"+_histTitle;
+  
+    canv->Print(outFile+".pdf");
+    outFileROOT->cd();
+    canv->Write();
+    outFileROOT->Close();
 }

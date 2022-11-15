@@ -20,8 +20,8 @@ int main(int argc, char **argv){
     int nBins=1000;
     std::vector<TString> oscPars = {"theta23", "theta13", "dm23", "dcp"};
 
-    std::vector<double> lowerBounds = {0.4, 0.01, 0.02, 0.01, -TMath::Pi()};
-    std::vector<double> upperBounds = {0.7, 0.02, 0.04, 0.02, TMath::Pi()};
+    std::vector<double> lowerBounds = {0.3, 0.0, 0.02, -0.005, -TMath::Pi()};
+    std::vector<double> upperBounds = {0.7, 0.15, 0.04, 0.005, TMath::Pi()};
     
     int burnin=100000;
 
@@ -48,7 +48,8 @@ int main(int argc, char **argv){
                  lowerBounds[iPar2], upperBounds[iPar2], nBins,
                  gHierarchyOpt, gOctOpt, burnin);
 
-                tmpCont->plotContourHist(gOutFileName);
+                // tmpCont->plotContourHist(gOutFileName);
+                tmpCont->plot2DPosterior(gOutFileName);
                 tmpStack = (THStack*)tmpCont->getCredibleStack();
             }
 

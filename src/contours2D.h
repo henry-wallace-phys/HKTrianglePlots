@@ -7,6 +7,7 @@ class contours2D : public contourBase{
         contours2D(TString reducedFileName, TString param1Name, TString param2Name, TString hist1Name, TString hist2Name, double lowerBound1, double upperBound1, int nBins1,
                         double lowerBound2, double upperBound2, int nBins2, int massHierarchyOpt, int octantOpt, int burnin);
 
+        void plot2DPosterior(TString outFile);
 	~contours2D();
     private:
         void get2DCredibleIntervals();

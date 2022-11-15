@@ -35,7 +35,6 @@ void contourBase::plotContourHist(TString outFile){
     TFile* outFileROOT=new TFile(outFile+".root", "UPDATE");
     outFileROOT->cd();
     fullPosteriorStack->Write(0,TObject::kOverwrite);
-    std::cout<<fullPosteriorStack->GetNhists()<<std::endl; 
     TCanvas* canv = new TCanvas(_histTitle, _histTitle, 1200, 600);
     canv->Draw();
     canv->cd();
