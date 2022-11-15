@@ -20,20 +20,24 @@
 class contourBase{
     public:
         contourBase(TString histName, int massHierarchyOpt, int octantOpt, int burn_in);
-		~contourBase();
-		THStack* getCredibleStack(){return fullPosteriorStack;}
+
+	~contourBase(){}
+
+	THStack* getCredibleStack(){return fullPosteriorStack;}
 
         TString setHistOptions();
         void plotContourHist(TString outFile); //NO EXTENSION HERE!
 
         template <typename T>
-        void makePrettyHist(T inHist){    
-            THStack* fullPosteriorStack = new THStack(_histTitle+"_intervals", _histTitle+"_intervals");
-            for(auto &iHist : inHist){
-                fullPosteriorStack->Add(iHist);
+        void makePrettyHist(std::vector<T> inHistVec, T posHist){    
+            fullPosteriorStack = new THStack(_histTitle+"_intervals", _histTitle+"_intervals");
+            fullPosteriorStack->Add(posHist);
+            for(int iHist=0; iHist<(int)inHistVec.size(); iHist++){
+                fullPosteriorStack->Add((T)inHistVec[iHist]);
             }
         }
-        
+
+	
         THStack* fullPosteriorStack;
         TString _histTitle;
 

@@ -5,7 +5,6 @@
 #include "TPad.h"
 #include <iostream>
 
-
 TString gOutFileName, gInFileName;
 int gOctOpt=0;
 int gHierarchyOpt=0;
@@ -19,7 +18,7 @@ int main(int argc, char **argv){
         throw;
     }
     int nBins=1000;
-    std::vector<TString> oscPars = {"theta23", "theta12", "theta13", "dm23", "dcp"};
+    std::vector<TString> oscPars = {"theta23", "theta13", "dm23", "dcp"};
 
     std::vector<double> lowerBounds = {0.4, 0.01, 0.02, 0.01, -TMath::Pi()};
     std::vector<double> upperBounds = {0.7, 0.02, 0.04, 0.02, TMath::Pi()};
@@ -62,7 +61,10 @@ int main(int argc, char **argv){
             tmpPad->Draw();
         }
     }
-    triCanv->Write(gOutFileName+".pdf]");
+    TFile* outFileROOT=new TFile(gOutFileName+".root", "UPDATE");
+    outFileROOT->cd();
+    triCanv->Write(0, TObject::kOverwrite);
+    triCanv->Print(gOutFileName+".pdf]");
     
     return 0;
 }
@@ -72,7 +74,7 @@ int parseargs(int argc, char **argv){
         switch(argv[1][1]){
         case 'i':
             gInFileName = argv[2];
-            std::cout << "Input File: " << gOutFileName << std::endl;
+            std::cout << "Input File: " << gInFileName << std::endl;
             ++argv; --argc;
             break;
         case 'o':

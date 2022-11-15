@@ -7,10 +7,6 @@ contourBase::contourBase(TString histName, int massHierarchyOpt, int octantOpt, 
     burnin=burn_in;
 }
 
-contourBase::~contourBase(){
-	delete fullPosteriorStack;
-}
-
 TString contourBase::setHistOptions(){
     TString optStr;
     optStr.Form("(step>%d)", burnin);
@@ -25,27 +21,25 @@ TString contourBase::setHistOptions(){
         case kBothOct : break;
         case kUO : optStr+="*(th23>0)"; break;
     }
-
     return optStr;
 }   
 
 void contourBase::plotContourHist(TString outFile){
     gStyle->SetPalette(kCool);
-    gStyle->SetOptStat(0);
 
-    TFile* outFileROOT=new TFile(outFile+".root", "update");
-    THStack* tempHist = (THStack*)outFileROOT->Get(_histTitle+"_intervals");
-    if(tempHist){
-        std::cout<<"Found "<<_histTitle<<"in "<<outFile<<".root, deleting"<<std::endl;
-        outFileROOT->Delete(_histTitle+";1");
-    }
+	if(!fullPosteriorStack){
+		std::cerr<<"Can't find your stack"<<std::endl;
+		throw;
+	}
+	
+    TFile* outFileROOT=new TFile(outFile+".root", "UPDATE");
     outFileROOT->cd();
-    fullPosteriorStack->Write(_histTitle+"_intervals");
-
-    TCanvas* canv = new TCanvas("PosteriorCanvas", "Posterior Canvas", 1200, 600);
-    canv->cd();
+    fullPosteriorStack->Write(0,TObject::kOverwrite);
+    std::cout<<fullPosteriorStack->GetNhists()<<std::endl; 
+    TCanvas* canv = new TCanvas(_histTitle, _histTitle, 1200, 600);
     canv->Draw();
-    fullPosteriorStack->Draw();
+    canv->cd();
+	fullPosteriorStack->Draw("pfc nostack");
     gPad->BuildLegend();
 
     outFile+="_"+_histTitle;

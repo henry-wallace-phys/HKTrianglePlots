@@ -10,7 +10,6 @@ class contours2D : public contourBase{
 	~contours2D();
     private:
         void get2DCredibleIntervals();
-        void makePrettyHist2D(){makePrettyHist(contourHists);}
         TH2D* posteriorHist;
 
         std::vector<double> contourLevels;

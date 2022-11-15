@@ -16,8 +16,7 @@ contours2D::contours2D(TString reducedFileName, TString param1Name, TString para
     posteriorHist = new TH2D( "posteriorHist", "posteriorHist", nBins1, lowerBound1, upperBound1, nBins2, lowerBound2, upperBound2);
     oscTree->Draw(param1Name+":"+param2Name+">>posteriorHist+", histOptions);
     get2DCredibleIntervals();
-    makePrettyHist<std::vector<TH2D* > >(contourHists);
-	inFile->Close();
+    makePrettyHist<TH2D*>(contourHists, posteriorHist);
 }
 	
 
@@ -37,6 +36,7 @@ void contours2D::get2DCredibleIntervals(){
         TString histName;
         histName.Form("%0.7f Credible Interval", credibleIntervals[iCredibleInt]);
         TH2D* copyHist = (TH2D*)posteriorHist->Clone(histName);
+        copyHist->SetNameTitle(histName, histName);
 
         double tsum=0;
         double tmax;
