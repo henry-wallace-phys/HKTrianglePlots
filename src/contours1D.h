@@ -3,9 +3,9 @@
 #pragma once
 #include "contourBase.h"
 
-class contours1D : contourBase{
+class contours1D : public contourBase{
     public:
-        contours1D(TString reducedFileName, TString paramName, TString oscBranchName, double lowerBound, double upperBound, double nBins, int massHierarchyOpt, int octantOpt, int burnin);
+        contours1D(TString reducedFileName, TString paramName, TString oscBranchName, double lowerBound, double upperBound, int nBins, int massHierarchyOpt, int octantOpt, int burnin);
 
         TH1D* getPosteriorHist(){return posteriorHist;}
 

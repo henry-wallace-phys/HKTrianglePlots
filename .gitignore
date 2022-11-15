@@ -1,5 +1,6 @@
 #Ignore Build
 build/
+Files/*
 
 #Ignore Emacs stuff
 *~

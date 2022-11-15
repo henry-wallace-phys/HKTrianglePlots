@@ -4,13 +4,13 @@ contourBase::contourBase(TString histName, int massHierarchyOpt, int octantOpt, 
     _histTitle=histName;
     massHierarchy=massHierarchyOpt;
     octant=octantOpt;
-    burnin=burnin;
+    burnin=burn_in;
 }
 
 
 TString contourBase::setHistOptions(){
     TString optStr;
-    optStr.Form("(Step>%d)", burnin);
+    optStr.Form("(step>%d)", burnin);
     switch(massHierarchy){
         case kIH : optStr+="*(dm23<0)"; break;
         case kBothHierarchy : break;

@@ -33,8 +33,6 @@ class contourBase{
             }
         }
         
-
-    private:
         THStack* fullPosteriorStack;
         TString _histTitle;
 

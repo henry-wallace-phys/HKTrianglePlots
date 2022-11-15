@@ -1,10 +1,14 @@
 #include "contours1D.h"
 
-contours1D::contours1D(TString reducedFileName, TString paramName, TString oscBranchName, double lowerBound, double upperBound, double nBins, int massHierarchyOpt=0, int octantOpt=0, int burnin=10000):
+contours1D::contours1D(TString reducedFileName, TString paramName, TString oscBranchName, double lowerBound, double upperBound, int nBins, int massHierarchyOpt=0, int octantOpt=0, int burnin=10000):
 contourBase(paramName+"_1DHist", massHierarchyOpt, octantOpt, burnin)
 {
     TFile* inFile = new TFile(reducedFileName, "open");
     
+    if(inFile->IsZombie()){
+        std::cerr<<"ERROR : Couldn't find : "<<reducedFileName<<std::endl;
+        throw;
+    }
     TTree* oscTree = (TTree*)inFile->Get("osc_posteriors");
 
     TString histOptions = setHistOptions();
@@ -15,8 +19,6 @@ contourBase(paramName+"_1DHist", massHierarchyOpt, octantOpt, burnin)
 
     oscParamName=paramName;
     inFile->Close();
-
-    posteriorHist->SetNameTitle("TotalDistribution_"+paramName, "Full distribution for "+paramName);
 
     setup1DCredibleIntervals();
     makePrettyHist<std::vector<TH1D* > >(credibleIntervalHists);

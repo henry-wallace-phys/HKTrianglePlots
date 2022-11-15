@@ -4,6 +4,11 @@ contours2D::contours2D(TString reducedFileName, TString param1Name, TString para
                         double lowerBound2, double upperBound2, int nBins2, int massHierarchyOpt=0, int octantOpt=0, int burnin=100000):
     contourBase(param1Name+param2Name+"_2DHist", massHierarchyOpt, octantOpt, burnin){
     TFile* inFile = new TFile(reducedFileName, "open");
+    if(inFile->IsZombie()){
+        std::cerr<<"ERROR : Couldn't find : "<<reducedFileName<<std::endl;
+        throw;
+    }
+ 
     TTree* oscTree = (TTree*)inFile->Get("osc_posteriors");
 
     TString histOptions = setHistOptions();
