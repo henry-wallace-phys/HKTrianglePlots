@@ -8,17 +8,15 @@
 TString gOutFileName, gInFileName;
 int gOctOpt=0;
 int gHierarchyOpt=0;
-
+int gNBins1D=1000;
+int gNBins2D=500;
 
 int parseargs(int argc, char **argv);
+void usage();
 
 int main(int argc, char **argv){
-    if(parseargs(argc, argv)!=0){
-        std::cerr<<"Usage is: ./makeContours [-i inputFile] [-o outputFile] [-c Octant=(-1,0,1)] [-h Hiearachy=(-1,0,1)]"<<std::endl;
-        throw;
-    }
-    int nBins1D=1000;
-    int nBins2D=1000;
+    if(parseargs(argc, argv)!=0) usage();
+
     std::vector<TString> oscPars = {"theta23", "theta13", "dm23", "dcp"};
 
     std::vector<double> lowerBounds = {0.3, 0.0, -0.005, -TMath::Pi()};
@@ -38,14 +36,14 @@ int main(int argc, char **argv){
         THStack* tmpStack;
         for(int iPar2=0; iPar2<=iPar1; iPar2++){
             if(iPar1==iPar2){
-                contours1D* tmpCont = new contours1D(gInFileName, oscPars[iPar1], oscPars[iPar1], lowerBounds[iPar1], upperBounds[iPar1], nBins1D, gHierarchyOpt, gOctOpt, burnin);
+                contours1D* tmpCont = new contours1D(gInFileName, oscPars[iPar1], oscPars[iPar1], lowerBounds[iPar1], upperBounds[iPar1], gNBins1D, gHierarchyOpt, gOctOpt, burnin);
                 tmpCont->plotContourHist(gOutFileName);
                 tmpStack = (THStack*)tmpCont->getCredibleStack();
             }
             else{            
                 contours2D* tmpCont = new contours2D(gInFileName, oscPars[iPar1], oscPars[iPar2], oscPars[iPar1], oscPars[iPar2],
-                 lowerBounds[iPar1], upperBounds[iPar1], nBins2D,
-                 lowerBounds[iPar2], upperBounds[iPar2], nBins2D,
+                 lowerBounds[iPar1], upperBounds[iPar1], gNBins2D,
+                 lowerBounds[iPar2], upperBounds[iPar2], gNBins2D,
                  gHierarchyOpt, gOctOpt, burnin);
 
                 // tmpCont->plotContourHist(gOutFileName);
@@ -93,13 +91,27 @@ int parseargs(int argc, char **argv){
             std::cout << "Hierarchy: " << gHierarchyOpt << std::endl;
             ++argv; --argc;
             break;
+        case 'b':
+            gNBins1D = atoi(argv[2]);
+            std::cout<<"Number of 1D bins "<<gNBins1D<<std::endl;
+            ++argv; --argc;
+            break;
+        case 't':
+            gNBins2D = atoi(argv[2]);
+            std::cout<<"Number of 2D bins "<<gNBins2D<<std::endl;
+            ++argv; --argc;
+            break;
         default:
             std::cerr << "Unrecognised flag!" << std::endl;
-            std::cerr<<"Usage is: ./makeContours [-i inputFile] [-o outputFile] [-c Octant=(-1,0,1)] [-h Hiearachy=(-1,0,1)]"<<std::endl;
-            throw;
+            usage();
             break;
         }
     ++argv; --argc;
     }
     return 0;
+}
+
+void usage(){
+        std::cerr<<"Usage is: ./makeContours [-i inputFile] [-o outputFile] [-c Octant=(-1,0,1)] [-h Hiearachy=(-1,0,1)] [-b number of 1d bins] [-t number of 2d bins]"<<std::endl;
+        throw;
 }
