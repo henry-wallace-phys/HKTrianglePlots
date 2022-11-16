@@ -19,5 +19,4 @@ class contours2D : public contourBase{
         TH2D* posteriorHist;
 
         std::vector<TH2D*> contourHists;
-        TH2D* posteriorContours;
 };
