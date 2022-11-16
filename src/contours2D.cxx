@@ -9,9 +9,12 @@ contours2D::contours2D(TString reducedFileName, TString param1Name, TString para
         throw;
     }
     TTree* oscTree = (TTree*)inFile->Get("osc_posteriors");
+
+
 	oscTree->SetBranchStatus("*", 1);
     TString histOptions = setHistOptions();
 
+    TTree* cloneTree = (TTree*)oscTree->Clone();
     posteriorHist = new TH2D(param1Name+param2Name+"_2DHist", param1Name+param2Name+"_2DHist", nBins1, lowerBound1, upperBound1, nBins2, lowerBound2, upperBound2);
   //  oscTree->Draw(param1Name+":"+param2Name+">>"+param1Name+param2Name+"_2DHist"); //<-The nice way... which doesn't work
 
@@ -23,26 +26,24 @@ contours2D::contours2D(TString reducedFileName, TString param1Name, TString para
 
     //Now for the other options
     oscTree->SetBranchAddress("step", &step);
-    oscTree->SetBranchAddress("theta23", &th23);
-    oscTree->SetBranchAddress("dm23", &dm23);
+    cloneTree->SetBranchAddress("theta23", &th23);
+    cloneTree->SetBranchAddress("dm23", &dm23);
 
     for(int iEntry=0; iEntry<oscTree->GetEntries(); iEntry++){
         oscTree->GetEntry(iEntry);
-
+        cloneTree->GetEntry(iEntry);
         if(step<burnin) continue; //No point gathering steps here
 
-        //Mass hierarchy
+        // Mass hierarchy
         if(massHierarchyOpt==-1 && dm23>0.0) continue;
         else if(massHierarchyOpt==1 && dm23<0.0) continue;
 
-        //Octant
+        // Octant
         if(octantOpt==-1 && th23>0.5) continue;
         else if(octantOpt==1 && th23<0.5) continue;
-
         //Now we've removed any junk we can do
-         posteriorHist->Fill(par1, par2);
+        posteriorHist->Fill(par1, par2);
     }
-
     get2DCredibleIntervals();
     makePrettyHist<TH2D*>(contourHists, posteriorHist);
 }
