@@ -74,7 +74,7 @@ set_target_properties(ROOT::ROOT PROPERTIES
     INTERFACE_LINK_LIBRARIES "${ROOT_LIB_NAMES}"
 )
 
-message(STATUS "Built ROOT::ROOT Imported target (T2KReWeight: ND280Polyfill)")
+message(STATUS "Built ROOT")
 message(STATUS "        ROOT_INCLUDE_DIRS: ${ROOT_INCLUDE_DIRS}: ")
 message(STATUS "        ROOT_CXX_FLAGS: ${ROOT_CXX_FLAGS}")
 message(STATUS "        ROOT_LIBRARIES: ${ROOT_LIBRARIES}")
@@ -94,27 +94,6 @@ endif()
 STRING(STRIP "${ROOT_CXX_FLAGS}" ROOT_CXX_FLAGS)
 STRING(REPLACE " " ";" ROOT_CXX_FLAGS ${ROOT_CXX_FLAGS})
 
-if("${CMAKE_PROJECT_NAME} " STREQUAL "T2KReWeight ")
-  list (FIND ROOT_CXX_FLAGS "-std=c++11" CPP11_INDEX)
-  list (FIND ROOT_CXX_FLAGS "-std=c++14" CPP14_INDEX)
-  list (FIND ROOT_CXX_FLAGS "-std=c++17" CPP17_INDEX)
-  list (FIND ROOT_CXX_FLAGS "-std=c++20" CPP20_INDEX)
-  if (${CPP11_INDEX} GREATER -1)
-    SET(CMAKE_CXX_STANDARD 11)
-  elseif (${CPP14_INDEX} GREATER -1)
-    SET(CMAKE_CXX_STANDARD 14)
-  elseif (${CPP17_INDEX} GREATER -1)
-    SET(CMAKE_CXX_STANDARD 17)
-  elseif (${CPP20_INDEX} GREATER -1)
-    SET(CMAKE_CXX_STANDARD 20)
-  else()
-    SET(CMAKE_CXX_STANDARD 11)
-  endif()
-
-  if (NOT DEFINED CMAKE_CXX_STANDARD OR "${CMAKE_CXX_STANDARD} " STREQUAL " ")
-    SET(CMAKE_CXX_STANDARD 11)
-  endif()
-endif()
 
 list(REMOVE_ITEM ROOT_CXX_FLAGS "-std=c++11")
 list(REMOVE_ITEM ROOT_CXX_FLAGS "-std=c++14")
@@ -162,7 +141,7 @@ set_target_properties(ROOT::ROOT PROPERTIES
     INTERFACE_LINK_LIBRARIES "${ROOT_LIB_NAMES}"
 )
 
-message(STATUS "Built ROOT::ROOT Imported target (T2KReWeight)")
+message(STATUS "Built ROOT::ROOT Imported target")
 message(STATUS "        ROOT_INCLUDE_DIRS: ${ROOT_INCLUDE_DIRS}: ")
 message(STATUS "        ROOT_CXX_FLAGS: ${ROOT_CXX_FLAGS}")
 message(STATUS "        ROOT_LIBRARIES: ${ROOT_LIBRARIES}")
