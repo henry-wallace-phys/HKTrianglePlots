@@ -39,7 +39,6 @@ contours1D::~contours1D(){
 
 
 void contours1D::setup1DCredibleIntervals(){
-    std::vector<double> credibleIntervals_vec = {0.67, 0.95, 99.9, 99.99, 99.99999};
     // {1sigma, 2sigma, 3sigma, 4sigma, 5sigma}
 
     double integral = posteriorHist->Integral(); 

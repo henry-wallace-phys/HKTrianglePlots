@@ -45,7 +45,6 @@ contours2D::contours2D(TString reducedFileName, TString param1Name, TString para
         posteriorHist->Fill(par1, par2);
     }
     get2DCredibleIntervals();
-    makePrettyHist<TH2D*>(contourHists, posteriorHist);
 }
 	
 
@@ -57,39 +56,79 @@ contours2D::~contours2D(){
 
 void contours2D::get2DCredibleIntervals(){
     //Givs us a vector of contour levels for plotting later!
-    std::vector<double> credibleIntervals = {0.67, 0.95, 99.9, 99.999, 99.999999};
+
+    contourLevels = new double[credibleIntervals_vec.size()];
     double integral=posteriorHist->Integral();
 
 	// Make contours for each credible interval
-    for(int iCredibleInt=0; iCredibleInt <(int)credibleIntervals.size(); iCredibleInt++){
+    for(int iCredibleInt=0; iCredibleInt <(int)credibleIntervals_vec.size(); iCredibleInt++){
         TString histName;
-        histName.Form("%0.7f Credible Interval", credibleIntervals[iCredibleInt]);
+        histName.Form("%0.7f Credible Interval", credibleIntervals_vec[iCredibleInt]);
         TH2D* copyHist = (TH2D*)posteriorHist->Clone(histName);
         copyHist->SetNameTitle(histName, histName);
 
+        double cred = credibleIntervals_vec[iCredibleInt];
         double tsum=0;
         double tmax=-99.0;
-        while((tsum/integral) < iCredibleInt && copyHist->GetMaximum()!=tmax){
+        double maxVal;
+
+        while((tsum/integral) < cred && copyHist->GetMaximum()!=tmax){
             tmax = copyHist->GetMaximum();
             tsum += tmax;
             int bin = copyHist->GetMaximumBin();
+            maxVal = copyHist->GetMaximum();
             copyHist->SetBinContent(bin, -999.0);
         }
 
-        double con[1];
-        con[0]=tmax;
-        copyHist->SetContour(1, con);
-        copyHist->SetLineColor(kWhite);
-        copyHist->Smooth(1);
-        copyHist->SetLineWidth(2);
         contourHists.push_back(copyHist);
-        contourLevels.push_back(tmax); //Get maximum bin for the interval
+        contourLevels[iCredibleInt]=maxVal; //Get maximum bin for the interval
     }
+}
+
+void contours2D::makeContourHist(){
+    posteriorContours = (TH2D*)posteriorHist->Clone();
+    posteriorContours->SetContour(credibleIntervals_vec.size(), contourLevels);
+}
+
+void contours2D::plot2DContourHistWPosterior(TString outFile){
+   //gStyle->SetPalette(kCool);
+    TFile* outFileROOT=new TFile(outFile+".root", "UPDATE");
+    outFileROOT->cd();
+    TCanvas* canv = new TCanvas(_histTitle, _histTitle, 1200, 600);
+    canv->Draw();
+    canv->cd();
+	posteriorHist->Draw("COLZ");
+    posteriorContours->SetLineColor(kBlue);
+    posteriorContours->Draw("cont3, SAME");
+    outFile+="_"+_histTitle;
+  
+    canv->Print(outFile+".pdf");
+    outFileROOT->cd();
+    canv->Write();
+    outFileROOT->Close();
+}
+
+
+void contours2D::plot2DContourHist(TString outFile){
+   //gStyle->SetPalette(kCool);
+    TFile* outFileROOT=new TFile(outFile+".root", "UPDATE");
+    outFileROOT->cd();
+    TCanvas* canv = new TCanvas(_histTitle, _histTitle, 1200, 600);
+    canv->Draw();
+    canv->cd();
+    posteriorContours->SetLineColor(kRed);
+    posteriorContours->Draw("cont3");
+    outFile+="_"+_histTitle;
+  
+    canv->Print(outFile+".pdf");
+    outFileROOT->cd();
+    canv->Write();
+    outFileROOT->Close();
 }
 
 void contours2D::plot2DPosterior(TString outFile){
   
-   //gStyle->SetPalette(kCool);
+    gStyle->SetPalette(kCool);
     TFile* outFileROOT=new TFile(outFile+".root", "UPDATE");
     outFileROOT->cd();
     TCanvas* canv = new TCanvas(_histTitle, _histTitle, 1200, 600);

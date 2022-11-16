@@ -25,6 +25,10 @@ int main(int argc, char **argv){
     int burnin=0;
 
     //Now to making the plots
+    TCanvas* triCanv = new TCanvas("triCanv", "Canvas for Triangle Plots", 2000, 2000);
+    triCanv->cd();
+    triCanv->Draw();
+    triCanv->Print(gOutFileName+".pdf[");
     //Loop over our hists
     for(int iPar1=0; iPar1<(int)oscPars.size(); iPar1++){
 		std::cout<<"Making contours for "<<oscPars[iPar1]<<std::endl;
@@ -32,7 +36,7 @@ int main(int argc, char **argv){
         for(int iPar2=0; iPar2<=iPar1; iPar2++){
             if(iPar1==iPar2){
                 contours1D* tmpCont = new contours1D(gInFileName, oscPars[iPar1], oscPars[iPar1], lowerBounds[iPar1], upperBounds[iPar1], gNBins1D, gHierarchyOpt, gOctOpt, burnin);
-                tmpCont->plotContourHist(gOutFileName);
+                THStack* tmpStack = (THStack*)tmpCont->getCredibleStack();
             }
             else{            
                 contours2D* tmpCont = new contours2D(gInFileName, oscPars[iPar1], oscPars[iPar2], oscPars[iPar1], oscPars[iPar2],
@@ -41,10 +45,23 @@ int main(int argc, char **argv){
                  gHierarchyOpt, gOctOpt, burnin);
 
                 // tmpCont->plotContourHist(gOutFileName);
-                tmpCont->plot2DContourHistWPosterior(gOutFileName);
+                tmpPos = (THStack*)tmpCont->getCredibleStack();
             }
+
+            triCanv->cd();
+            TPad* tmpPad=new TPad("tmpPad", "tmpPad", 0.1+0.2*iPar2, 0.7-0.2*iPar1, 0.3+0.2*iPar2, 0.9-0.2*iPar1);
+            tmpPad->cd();
+            tmpPad->Draw();
+            
+            tmpStack->Draw();
+            tmpPad->Draw();
         }
-    }    
+    }
+    TFile* outFileROOT=new TFile(gOutFileName+".root", "UPDATE");
+    outFileROOT->cd();
+    triCanv->Write(0, TObject::kOverwrite);
+    triCanv->Print(gOutFileName+".pdf]");
+    
     return 0;
 }
 

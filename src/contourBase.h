@@ -16,6 +16,7 @@
 #include <TVirtualPad.h>
 #include <TCanvas.h>
 #include <TTree.h>
+#include <TColor.h>
 
 class contourBase{
     public:
@@ -37,7 +38,8 @@ class contourBase{
             }
         }
 
-	
+	    std::vector<double> credibleIntervals_vec = {0.67, 0.95, 99.9, 99.999, 99.999999};
+
         THStack* fullPosteriorStack;
         TString _histTitle;
 
