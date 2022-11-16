@@ -45,7 +45,6 @@ contours2D::contours2D(TString reducedFileName, TString param1Name, TString para
         posteriorHist->Fill(par1, par2);
     }
     get2DCredibleIntervals();
-    makeContourHist();
 }
 	
 
@@ -70,12 +69,10 @@ void contours2D::get2DCredibleIntervals(){
         double cred = credibleIntervals_vec[iCredibleInt];
         double tsum=0;
         double tmax=-99.0;
-        double maxVal;
 
         while((tsum/integral) < cred && copyHist->GetMaximum()!=tmax){
             tmax = copyHist->GetMaximum();
             int bin = copyHist->GetMaximumBin();
-            maxVal = copyHist->GetMaximum();
             copyHist->SetBinContent(bin, -1.0);
             tsum += tmax;
         }

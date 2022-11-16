@@ -10,7 +10,6 @@ class contours2D : public contourBase{
         void plot2DPosterior(TString outFile);
         TH2D* getPosteriorHist(){return posteriorHist;}
 
-        void makeContourHist();
         void plot2DContourHist(TString outFile); //Just plots contours
         void plot2DContourHistWPosterior(TString outFile); //Plots contours with posterior in the background
 
