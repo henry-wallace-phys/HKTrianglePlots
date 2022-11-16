@@ -57,16 +57,16 @@ void contours1D::setup1DCredibleIntervals(){
         double xwidth; //width of bins
         double bf = copyHist->GetXaxis()->GetBinCenter(copyHist->GetMaximumBin()); //OG big bin
 
-        while((tsum/integral)<credVal && copyHist->GetMaximum()!=1) {
+        double tmax=-99.0;
+
+        while((tsum/integral)<credVal && copyHist->GetMaximum()!=tmax) {
             //Loop until we delete (set to -1) any bins inside of credible interval
-            double tmax = copyHist->GetMaximum();
+            tmax = copyHist->GetMaximum();
             int bin = copyHist->GetMaximumBin();
             int xval = copyHist->GetXaxis()->GetBinCenter(bin);
 
-
             xwidth = copyHist->GetXaxis()->GetBinWidth(bin);
             copyHist->SetBinContent(bin,-1.0);
-            copyHist->SetBinContent(bin,0.);
             if(xval<low && xval<bf) low = xval - xwidth/2.;
             if(xval>up && xval>bf) up = xval + xwidth/2.;
             nbins++;

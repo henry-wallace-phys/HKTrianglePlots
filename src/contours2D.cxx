@@ -1,4 +1,4 @@
-#include <contours2D.h>
+#include "contours2D.h"
 
 contours2D::contours2D(TString reducedFileName, TString param1Name, TString param2Name, TString hist1Name, TString hist2Name, double lowerBound1, double upperBound1, int nBins1,
                         double lowerBound2, double upperBound2, int nBins2, int massHierarchyOpt=0, int octantOpt=0, int burnin=100000):
@@ -10,11 +10,38 @@ contours2D::contours2D(TString reducedFileName, TString param1Name, TString para
     }
     TTree* oscTree = (TTree*)inFile->Get("osc_posteriors");
 	oscTree->SetBranchStatus("*", 1);
-
     TString histOptions = setHistOptions();
 
-    posteriorHist = new TH2D( "posteriorHist", "posteriorHist", nBins1, lowerBound1, upperBound1, nBins2, lowerBound2, upperBound2);
-    oscTree->Draw(param1Name+":"+param2Name+">>posteriorHist", histOptions);
+    posteriorHist = new TH2D(param1Name+param2Name+"_2DHist", param1Name+param2Name+"_2DHist", nBins1, lowerBound1, upperBound1, nBins2, lowerBound2, upperBound2);
+  //  oscTree->Draw(param1Name+":"+param2Name+">>"+param1Name+param2Name+"_2DHist"); //<-The nice way... which doesn't work
+
+    double par1, par2, dm23, th23;
+    int step;
+    
+    oscTree->SetBranchAddress(param1Name, &par1);
+    oscTree->SetBranchAddress(param2Name, &par2);
+
+    //Now for the other options
+    oscTree->SetBranchAddress("step", &step);
+    oscTree->SetBranchAddress("theta23", &th23);
+    oscTree->SetBranchAddress("dm23", &dm23);
+
+    for(int iEntry=0; iEntry<oscTree->GetEntries(); iEntry++){
+        oscTree->GetEntry(iEntry);
+
+        if(step<burnin) continue; //No point gathering steps here
+
+        //Mass hierarchy
+        if(massHierarchyOpt==-1 && dm23>0.0) continue;
+        else if(massHierarchyOpt==1 && dm23<0.0) continue;
+
+        //Octant
+        if(octantOpt==-1 && th23>0.5) continue;
+        else if(octantOpt==1 && th23<0.5) continue;
+
+        //Now we've removed any junk we can do
+         posteriorHist->Fill(par1, par2);
+    }
 
     get2DCredibleIntervals();
     makePrettyHist<TH2D*>(contourHists, posteriorHist);
@@ -40,8 +67,8 @@ void contours2D::get2DCredibleIntervals(){
         copyHist->SetNameTitle(histName, histName);
 
         double tsum=0;
-        double tmax;
-        while((tsum/integral) < iCredibleInt){
+        double tmax=-99.0;
+        while((tsum/integral) < iCredibleInt && copyHist->GetMaximum()!=tmax){
             tmax = copyHist->GetMaximum();
             tsum += tmax;
             int bin = copyHist->GetMaximumBin();
@@ -61,14 +88,13 @@ void contours2D::get2DCredibleIntervals(){
 
 void contours2D::plot2DPosterior(TString outFile){
   
-    gStyle->SetPalette(kCool);
+   //gStyle->SetPalette(kCool);
     TFile* outFileROOT=new TFile(outFile+".root", "UPDATE");
     outFileROOT->cd();
     TCanvas* canv = new TCanvas(_histTitle, _histTitle, 1200, 600);
     canv->Draw();
     canv->cd();
 	posteriorHist->Draw("COLZ");
-    gPad->BuildLegend();
 
     outFile+="_"+_histTitle;
   

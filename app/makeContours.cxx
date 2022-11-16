@@ -17,13 +17,14 @@ int main(int argc, char **argv){
         std::cerr<<"Usage is: ./makeContours [-i inputFile] [-o outputFile] [-c Octant=(-1,0,1)] [-h Hiearachy=(-1,0,1)]"<<std::endl;
         throw;
     }
-    int nBins=1000;
+    int nBins1D=1000;
+    int nBins2D=1000;
     std::vector<TString> oscPars = {"theta23", "theta13", "dm23", "dcp"};
 
-    std::vector<double> lowerBounds = {0.3, 0.0, 0.02, -0.005, -TMath::Pi()};
-    std::vector<double> upperBounds = {0.7, 0.15, 0.04, 0.005, TMath::Pi()};
+    std::vector<double> lowerBounds = {0.3, 0.0, -0.005, -TMath::Pi()};
+    std::vector<double> upperBounds = {0.7, 0.1, 0.005, TMath::Pi()};
     
-    int burnin=100000;
+    int burnin=0;
 
     //Now to making the plots
     TCanvas* triCanv = new TCanvas("triCanv", "Canvas for Triangle Plots", 2000, 2000);
@@ -37,15 +38,14 @@ int main(int argc, char **argv){
         THStack* tmpStack;
         for(int iPar2=0; iPar2<=iPar1; iPar2++){
             if(iPar1==iPar2){
-                contours1D* tmpCont = new contours1D(gInFileName, oscPars[iPar1], oscPars[iPar1], lowerBounds[iPar1], upperBounds[iPar1], nBins, gHierarchyOpt, gOctOpt, burnin);
-               
+                contours1D* tmpCont = new contours1D(gInFileName, oscPars[iPar1], oscPars[iPar1], lowerBounds[iPar1], upperBounds[iPar1], nBins1D, gHierarchyOpt, gOctOpt, burnin);
                 tmpCont->plotContourHist(gOutFileName);
                 tmpStack = (THStack*)tmpCont->getCredibleStack();
             }
             else{            
                 contours2D* tmpCont = new contours2D(gInFileName, oscPars[iPar1], oscPars[iPar2], oscPars[iPar1], oscPars[iPar2],
-                 lowerBounds[iPar1], upperBounds[iPar1], nBins,
-                 lowerBounds[iPar2], upperBounds[iPar2], nBins,
+                 lowerBounds[iPar1], upperBounds[iPar1], nBins2D,
+                 lowerBounds[iPar2], upperBounds[iPar2], nBins2D,
                  gHierarchyOpt, gOctOpt, burnin);
 
                 // tmpCont->plotContourHist(gOutFileName);

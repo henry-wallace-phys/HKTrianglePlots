@@ -31,10 +31,6 @@ void contourBase::plotContourHist(TString outFile){
 		std::cerr<<"Can't find your stack"<<std::endl;
 		throw;
 	}
-	
-    TFile* outFileROOT=new TFile(outFile+".root", "UPDATE");
-    outFileROOT->cd();
-    fullPosteriorStack->Write(0,TObject::kOverwrite);
     TCanvas* canv = new TCanvas(_histTitle, _histTitle, 1200, 600);
     canv->Draw();
     canv->cd();
@@ -43,8 +39,6 @@ void contourBase::plotContourHist(TString outFile){
 
     outFile+="_"+_histTitle;
     canv->Print(outFile+".pdf");
-    outFileROOT->cd();
-    canv->Write();
-    outFileROOT->Close();
+
 }
 
