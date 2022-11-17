@@ -38,8 +38,7 @@ class contourBase{
             }
         }
 
-	    std::vector<double> credibleIntervals_vec = {0.67, 0.95, 99.9, 99.999, 99.999999};
-
+	    std::vector<double> credibleIntervals_vec = {0.67, 0.95, 0.999, 0.99999, 0.999999};
         THStack* fullPosteriorStack;
         TString _histTitle;
 

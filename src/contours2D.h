@@ -17,6 +17,5 @@ class contours2D : public contourBase{
     private:
         void get2DCredibleIntervals();
         TH2D* posteriorHist;
-
         std::vector<TH2D*> contourHists;
 };

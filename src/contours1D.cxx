@@ -58,7 +58,7 @@ void contours1D::setup1DCredibleIntervals(){
 
         double tmax=-99.0;
 
-        while((tsum/integral)<credVal && copyHist->GetMaximum()!=tmax) {
+        while((tsum/integral)<credVal) {
             //Loop until we delete (set to -1) any bins inside of credible interval
             tmax = copyHist->GetMaximum();
             int bin = copyHist->GetMaximumBin();

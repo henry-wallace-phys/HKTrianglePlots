@@ -58,29 +58,34 @@ void contours2D::get2DCredibleIntervals(){
     //Givs us a vector of contour levels for plotting later!
 
     double integral=posteriorHist->Integral();
-
 	// Make contours for each credible interval
+    TH2D* copyHist = (TH2D*)posteriorHist->Clone();
+    double tsum=0;
+    double tmax=-99.0;
     for(int iCredibleInt=0; iCredibleInt <(int)credibleIntervals_vec.size(); iCredibleInt++){
-        TString histName;
-        histName.Form("%0.7f Credible Interval", credibleIntervals_vec[iCredibleInt]);
-        TH2D* copyHist = (TH2D*)posteriorHist->Clone(histName);
-        copyHist->SetNameTitle(histName, histName);
 
         double cred = credibleIntervals_vec[iCredibleInt];
-        double tsum=0;
-        double tmax=-99.0;
 
-        while((tsum/integral) < cred && copyHist->GetMaximum()!=tmax){
+        while((tsum/integral) < cred){
             tmax = copyHist->GetMaximum();
+            tsum+=tmax;
             int bin = copyHist->GetMaximumBin();
-            copyHist->SetBinContent(bin, -1.0);
-            tsum += tmax;
+            copyHist->SetBinContent(bin, -1.*(iCredibleInt*2.0+1.0));
         }
         double contourLevels[1];
         contourLevels[0]=tmax; //Get maximum bin for the interval
-        copyHist->SetContour(1, contourLevels);
-        copyHist->Smooth();
-        contourHists.push_back(copyHist);
+
+        TString histName;
+        histName.Form("%0.7f Credible Interval", credibleIntervals_vec[iCredibleInt]);
+
+        TH2D* saveHist=(TH2D*)posteriorHist->Clone();
+        saveHist->SetNameTitle(histName, histName);
+        saveHist->SetContour(1, contourLevels);
+        // copyHist->SetLineStyle(2);
+        // copyHist->Smooth(1);
+        // copyHist->SetLineWidth(2);
+
+        contourHists.push_back(saveHist);
     }
 }
 
@@ -91,9 +96,11 @@ void contours2D::plot2DContourHistWPosterior(TString outFile){
     TCanvas* canv = new TCanvas(_histTitle, _histTitle, 1200, 600);
     canv->Draw();
     canv->cd();
-	posteriorHist->DrawCopy("COLZ");
+	posteriorHist->DrawCopy("COL");
     for(TH2D* iHist : contourHists){
-        iHist->SetLineColor(kRed);
+        canv->cd();
+        iHist->Smooth(1);
+        iHist->SetLineColor(kWhite);
         iHist->Draw("SAME CONT3");
     }
     gPad->BuildLegend();
@@ -113,11 +120,13 @@ void contours2D::plot2DContourHist(TString outFile){
     outFileROOT->cd();
     TCanvas* canv = new TCanvas(_histTitle, _histTitle, 1200, 600);
     canv->Draw();
-    canv->cd();
-    posteriorHist->SetLineColor(kRed);
-    posteriorHist->Smooth();
+    for(TH2D* iHist : contourHists){
+        canv->cd();
+        iHist->Smooth(1);
+        iHist->SetLineColor(kRed);
+        iHist->Draw("CONT3 SAME");
+    }
     // posteriorHist->SetContour(100, );
-    posteriorHist->Draw("cont3");
     outFile+="_"+_histTitle;
   
     canv->Print(outFile+".pdf");

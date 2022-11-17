@@ -41,7 +41,8 @@ int main(int argc, char **argv){
                  gHierarchyOpt, gOctOpt, burnin);
 
                 // tmpCont->plotContourHist(gOutFileName);
-                tmpCont->plot2DContourHistWPosterior(gOutFileName);
+                tmpCont->plot2DContourHist(gOutFileName);
+                // tmpCont->plot2DContourHistWPosterior(gOutFileName);
             }
         }
     }    
