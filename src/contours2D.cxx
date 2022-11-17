@@ -45,6 +45,7 @@ contours2D::contours2D(TString reducedFileName, TString param1Name, TString para
         posteriorHist->Fill(par1, par2);
     }
     get2DCredibleIntervals();
+    makePrettyHist<TH2D*>(contourHists, posteriorHist);
 }
 	
 
@@ -84,26 +85,34 @@ void contours2D::get2DCredibleIntervals(){
         // copyHist->SetLineStyle(2);
         // copyHist->Smooth(1);
         // copyHist->SetLineWidth(2);
+        saveHist->Smooth(1);
 
+        saveHist->SetLineWidth(1.0);
         contourHists.push_back(saveHist);
     }
 }
 
 void contours2D::plot2DContourHistWPosterior(TString outFile){
     gStyle->SetPalette(kCool);
+    gStyle->SetOptStat(0);
+
     TFile* outFileROOT=new TFile(outFile+".root", "UPDATE");
     outFileROOT->cd();
     TCanvas* canv = new TCanvas(_histTitle, _histTitle, 1200, 600);
     canv->Draw();
     canv->cd();
 	posteriorHist->DrawCopy("COL");
+
+    int colourType=0;
     for(TH2D* iHist : contourHists){
         canv->cd();
         iHist->Smooth(1);
-        iHist->SetLineColor(kWhite);
+        colourType+=1;
+
+        iHist->SetLineColor(kBlack+10*colourType);
         iHist->Draw("SAME CONT3");
     }
-    gPad->BuildLegend();
+    gPad->BuildLegend(0.6,0.7,0.9,0.9);
 
     outFile+="_"+_histTitle;
   
@@ -120,12 +129,17 @@ void contours2D::plot2DContourHist(TString outFile){
     outFileROOT->cd();
     TCanvas* canv = new TCanvas(_histTitle, _histTitle, 1200, 600);
     canv->Draw();
+    int colourType=0;
+
     for(TH2D* iHist : contourHists){
         canv->cd();
         iHist->Smooth(1);
-        iHist->SetLineColor(kRed);
+        iHist->SetLineColor(kRed+colourType);
+        colourType+=1;
         iHist->Draw("CONT3 SAME");
     }
+    gPad->BuildLegend(0.6,0.7,0.9,0.9);
+
     // posteriorHist->SetContour(100, );
     outFile+="_"+_histTitle;
   

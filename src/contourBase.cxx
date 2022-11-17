@@ -26,6 +26,7 @@ TString contourBase::setHistOptions(){
 
 void contourBase::plotContourHist(TString outFile){
     gStyle->SetPalette(kCool);
+    gStyle->SetOptStat(0);
 
 	if(!fullPosteriorStack){
 		std::cerr<<"Can't find your stack"<<std::endl;
@@ -35,7 +36,7 @@ void contourBase::plotContourHist(TString outFile){
     canv->Draw();
     canv->cd();
 	fullPosteriorStack->Draw("pfc nostack");
-    gPad->BuildLegend();
+    gPad->BuildLegend(0.6,0.7,0.9,0.9);
 
     outFile+="_"+_histTitle;
     canv->Print(outFile+".pdf");

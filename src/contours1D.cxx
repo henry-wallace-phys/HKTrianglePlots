@@ -22,8 +22,7 @@ contourBase(paramName+"_1DHist", massHierarchyOpt, octantOpt, burnin)
 		oscTree->Show();
 		throw;
 	}
-		
-		
+    posteriorHist->SetLineColor(kBlack);
     oscParamName=paramName;
 
     setup1DCredibleIntervals();

@@ -18,8 +18,11 @@
 #include <TTree.h>
 #include <TColor.h>
 
+
 class contourBase{
     public:
+
+        
         contourBase(TString histName, int massHierarchyOpt, int octantOpt, int burn_in);
 
 	~contourBase(){}
