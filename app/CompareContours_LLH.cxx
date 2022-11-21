@@ -16,39 +16,41 @@ void usage();
 
 int main(int argc, char **argv){
     if(parseargs(argc, argv)!=0) usage();
+    gStyle->SetPalette(kCool);
+    gStyle->SetOptStat(0);
 
     std::vector<TString> oscPars = {"theta23", "theta13", "dcp"};
     std::vector<TString > llhNames = {"theta_23", "theta_13", "delta_cp"};
-    std::vector<double> lowerBounds = {0.3, 0.0, -0.005, -TMath::Pi()};
-    std::vector<double> upperBounds = {0.7, 0.1, 0.005, TMath::Pi()};
+    std::vector<double> lowerBounds = {0.3, 0.0, -TMath::Pi()};
+    std::vector<double> upperBounds = {0.7, 0.1, TMath::Pi()};
     
+    std::vector<std::vector<TH2D*>> histVec;
+
     int burnin=0;
     
     TFile* llhFile = new TFile(gLLHFileName);
 
     std::vector<std::vector<TH2D* > > Hist2DVec;
-    TCanvas* canv = new TCanvas("canv", "canv", 2000, 2000);
 
-    canv->Print(gOutFileName+".pdf[");
     //Now to making the plots
     //Loop over our hists
     for(int iPar1=0; iPar1<(int)oscPars.size(); iPar1++){
 		std::cout<<"Making contours for "<<oscPars[iPar1]<<std::endl;
         std::vector<contours2D> tmpVec;
+
+        contours2D* tmpCont;
         for(int iPar2=0; iPar2<=iPar1; iPar2++){
             if(iPar1==iPar2){
                 continue;
             }
-            contours2D* tmpCont = new contours2D(gInFileName, oscPars[iPar1], oscPars[iPar2], oscPars[iPar1], oscPars[iPar2],
-            lowerBounds[iPar1], upperBounds[iPar1], gNBins2D,
-            lowerBounds[iPar2], upperBounds[iPar2], gNBins2D,
-            gHierarchyOpt, gOctOpt, burnin);
-
-            std::vector<TH2D*> contourVec = tmpCont->getContours();
-            
-            TH2D* LLHPlot = NULL;
+            TH2D* LLHPlot=NULL;
             llhFile->GetObject("llh_scan_"+llhNames[iPar1]+"_"+llhNames[iPar2], LLHPlot);
+          
             if(LLHPlot){
+                tmpCont = new contours2D(gInFileName, oscPars[iPar1], oscPars[iPar2], oscPars[iPar1], oscPars[iPar2],
+                    lowerBounds[iPar1], upperBounds[iPar1], gNBins2D,
+                    lowerBounds[iPar2], upperBounds[iPar2], gNBins2D,
+                    gHierarchyOpt, gOctOpt, burnin);
                 LLHPlot->GetXaxis()->SetTitle(oscPars[iPar1]);
                 LLHPlot->GetYaxis()->SetTitle(oscPars[iPar2]);
             }
@@ -58,22 +60,41 @@ int main(int argc, char **argv){
                     std::cout<<"Couldn't find LLH scan for combination of "<<llhNames[iPar2]+"_"+llhNames[iPar1]<<std::endl;
                     continue;
                 }
+                tmpCont = new contours2D(gInFileName, oscPars[iPar2], oscPars[iPar1], oscPars[iPar2], oscPars[iPar1],
+                    lowerBounds[iPar2], upperBounds[iPar2], gNBins2D,
+                    lowerBounds[iPar1], upperBounds[iPar1], gNBins2D,
+                    gHierarchyOpt, gOctOpt, burnin);
                 LLHPlot->GetXaxis()->SetTitle(oscPars[iPar2]);
                 LLHPlot->GetYaxis()->SetTitle(oscPars[iPar1]);
             }
 
+            std::vector<TH2D*> contourVec = tmpCont->getContours();
+            
+            std::vector<TH2D*> tmpVec;
 
-            canv->cd();
             LLHPlot->SetContour(300);            
-            LLHPlot->Draw("COLZ");
+            tmpVec.push_back(LLHPlot);
 
             for(TH2D* iHist : contourVec){
-                iHist->Smooth(1);
-                iHist->SetLineColor(kRed);
-                iHist->Draw("SAME");
+                tmpVec.push_back(iHist);
             }
-            canv->Print(gOutFileName+".pdf");
+            histVec.push_back(tmpVec);
         }
+    }
+
+    TCanvas* canv = new TCanvas("canv", "canv", 1200, 600);
+    canv->Print(gOutFileName+".pdf[");
+    for(int iHistVec=0; iHistVec<(int)histVec.size(); iHistVec++){
+        canv->cd();
+        histVec[iHistVec][0]->Draw("COLZ");
+        for(int iHist=1; iHist<histVec[iHistVec].size(); iHist++){
+            canv->cd();
+            histVec[iHistVec][iHist]->Smooth(1);
+            histVec[iHistVec][iHist]->SetLineColor(kBlack);
+
+            histVec[iHistVec][iHist]->Draw("SAME CONT3");
+        }
+        canv->Print(gOutFileName+".pdf");
     }
     canv->Print(gOutFileName+".pdf]");
 
