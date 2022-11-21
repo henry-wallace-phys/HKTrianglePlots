@@ -5,7 +5,7 @@
 #include "TPad.h"
 #include <iostream>
 
-TString gOutFileName, gInFileName;
+TString gOutFileName, gInFileName, gLLHFileName;
 int gOctOpt=0;
 int gHierarchyOpt=0;
 int gNBins1D=1000;
@@ -17,51 +17,66 @@ void usage();
 int main(int argc, char **argv){
     if(parseargs(argc, argv)!=0) usage();
 
-    std::vector<TString> oscPars = {"theta23", "theta13", "dm23", "dcp"};
-
+    std::vector<TString> oscPars = {"theta23", "theta13", "dcp"};
+    std::vector<TString > llhNames = {"theta_23", "theta_13", "delta_cp"};
     std::vector<double> lowerBounds = {0.3, 0.0, -0.005, -TMath::Pi()};
     std::vector<double> upperBounds = {0.7, 0.1, 0.005, TMath::Pi()};
     
     int burnin=0;
+    
+    TFile* llhFile = new TFile(gLLHFileName);
 
+    std::vector<std::vector<TH2D* > > Hist2DVec;
+    TCanvas* canv = new TCanvas("canv", "canv", 2000, 2000);
+
+    canv->Print(gOutFileName+".pdf[");
     //Now to making the plots
-    TCanvas* triCanv = new TCanvas("triCanv", "Canvas for Triangle Plots", 2000, 2000);
-    triCanv->cd();
-    triCanv->Draw();
-    triCanv->Print(gOutFileName+".pdf[");
     //Loop over our hists
     for(int iPar1=0; iPar1<(int)oscPars.size(); iPar1++){
 		std::cout<<"Making contours for "<<oscPars[iPar1]<<std::endl;
         std::vector<contours2D> tmpVec;
         for(int iPar2=0; iPar2<=iPar1; iPar2++){
             if(iPar1==iPar2){
-                contours1D* tmpCont = new contours1D(gInFileName, oscPars[iPar1], oscPars[iPar1], lowerBounds[iPar1], upperBounds[iPar1], gNBins1D, gHierarchyOpt, gOctOpt, burnin);
-                THStack* tmpStack = (THStack*)tmpCont->getCredibleStack();
+                continue;
             }
-            else{            
-                contours2D* tmpCont = new contours2D(gInFileName, oscPars[iPar1], oscPars[iPar2], oscPars[iPar1], oscPars[iPar2],
-                 lowerBounds[iPar1], upperBounds[iPar1], gNBins2D,
-                 lowerBounds[iPar2], upperBounds[iPar2], gNBins2D,
-                 gHierarchyOpt, gOctOpt, burnin);
+            contours2D* tmpCont = new contours2D(gInFileName, oscPars[iPar1], oscPars[iPar2], oscPars[iPar1], oscPars[iPar2],
+            lowerBounds[iPar1], upperBounds[iPar1], gNBins2D,
+            lowerBounds[iPar2], upperBounds[iPar2], gNBins2D,
+            gHierarchyOpt, gOctOpt, burnin);
 
-                // tmpCont->plotContourHist(gOutFileName);
-                tmpPos = (THStack*)tmpCont->getCredibleStack();
-            }
-
-            triCanv->cd();
-            TPad* tmpPad=new TPad("tmpPad", "tmpPad", 0.1+0.2*iPar2, 0.7-0.2*iPar1, 0.3+0.2*iPar2, 0.9-0.2*iPar1);
-            tmpPad->cd();
-            tmpPad->Draw();
+            std::vector<TH2D*> contourVec = tmpCont->getContours();
             
-            tmpStack->Draw();
-            tmpPad->Draw();
+            TH2D* LLHPlot = NULL;
+            llhFile->GetObject("llh_scan_"+llhNames[iPar1]+"_"+llhNames[iPar2], LLHPlot);
+            if(LLHPlot){
+                LLHPlot->GetXaxis()->SetTitle(oscPars[iPar1]);
+                LLHPlot->GetYaxis()->SetTitle(oscPars[iPar2]);
+            }
+            else{
+                llhFile->GetObject("llh_scan_"+llhNames[iPar2]+"_"+llhNames[iPar1], LLHPlot);
+                if(!LLHPlot){
+                    std::cout<<"Couldn't find LLH scan for combination of "<<llhNames[iPar2]+"_"+llhNames[iPar1]<<std::endl;
+                    continue;
+                }
+                LLHPlot->GetXaxis()->SetTitle(oscPars[iPar2]);
+                LLHPlot->GetYaxis()->SetTitle(oscPars[iPar1]);
+            }
+
+
+            canv->cd();
+            LLHPlot->SetContour(300);            
+            LLHPlot->Draw("COLZ");
+
+            for(TH2D* iHist : contourVec){
+                iHist->Smooth(1);
+                iHist->SetLineColor(kRed);
+                iHist->Draw("SAME");
+            }
+            canv->Print(gOutFileName+".pdf");
         }
     }
-    TFile* outFileROOT=new TFile(gOutFileName+".root", "UPDATE");
-    outFileROOT->cd();
-    triCanv->Write(0, TObject::kOverwrite);
-    triCanv->Print(gOutFileName+".pdf]");
-    
+    canv->Print(gOutFileName+".pdf]");
+
     return 0;
 }
 
@@ -76,6 +91,11 @@ int parseargs(int argc, char **argv){
         case 'o':
             gOutFileName = argv[2];
             std::cout << "Output file: " << gOutFileName << std::endl;
+            ++argv; --argc;
+            break;
+        case 'l':
+            gLLHFileName = argv[2];
+            std::cout << "LLH Scan File : "<<gLLHFileName<<std::endl;
             ++argv; --argc;
             break;
         case 'c':
