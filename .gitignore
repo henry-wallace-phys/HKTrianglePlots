@@ -6,3 +6,4 @@ Files/*
 #Ignore Emacs stuff
 *~
 *#*
+.vscode
