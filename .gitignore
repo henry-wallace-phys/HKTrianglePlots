@@ -1,7 +1,8 @@
 #Ignore Build
 build/
 Files/*
-
+*.pdf
+*.root
 #Ignore Emacs stuff
 *~
 *#*

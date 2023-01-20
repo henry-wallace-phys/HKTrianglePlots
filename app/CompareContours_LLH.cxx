@@ -87,7 +87,7 @@ int main(int argc, char **argv){
     for(int iHistVec=0; iHistVec<(int)histVec.size(); iHistVec++){
         canv->cd();
         histVec[iHistVec][0]->Draw("COLZ");
-        for(int iHist=1; iHist<histVec[iHistVec].size(); iHist++){
+        for(int iHist=1; iHist<(int)histVec[iHistVec].size(); iHist++){
             canv->cd();
             histVec[iHistVec][iHist]->Smooth(1);
             histVec[iHistVec][iHist]->SetLineColor(kBlack);
